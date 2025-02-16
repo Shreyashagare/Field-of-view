@@ -2,101 +2,193 @@
 <html>
 <head>
   <style>
-    .card {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      background: white;
-    }
-
-    .card-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-    }
-
-    .slider-container {
-      margin-bottom: 2rem;
-    }
-
-    .animal-info {
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      margin-bottom: 0.5rem;
+      background: #e0e7ff;
+      font-family: Arial, sans-serif;
     }
-
-    .animal-name {
-      font-weight: 500;
+    .card {
+      width: 95%;
+      max-width: 1400px;
+      height: 90vh;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      box-sizing: border-box;
     }
-
-    .total-fov {
+    .card-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .content-wrapper {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+    }
+    .visualization-container {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .info-panel {
+      flex: 2;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f9f9f9;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .vision-box {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+    .vision-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+    .info-panel h3 {
+      color: #444;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #6366f1;
+    }
+    .info-panel p, .info-panel li {
       color: #666;
-      font-size: 0.875rem;
+      font-size: 0.95rem;
     }
-
+    .animal-info {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #444;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .visualization {
+      width: 80%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #eef2ff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.1);
+    }
+    svg {
+      width: 70%;
+      max-height: 400px;
+    }
+    .total-fov-container {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .total-fov {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .slider-container {
+      width: 60%;
+      margin-top: 15px;
+    }
     .slider {
       width: 100%;
-      margin: 1rem 0;
+      height: 10px;
+      border-radius: 5px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      outline: none;
+      transition: 0.3s;
+      -webkit-appearance: none;
+      cursor: pointer;
     }
-
-    .visualization {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1;
+    .slider:hover {
+      opacity: 0.9;
     }
-
-    svg {
-      width: 100%;
-      height: 100%;
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
     }
-
-    .legend-text {
-      font-size: 12px;
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      border: none;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2 class="card-title">Animal Field of Vision Comparison</h2>
-    <div class="slider-container">
-      <div class="animal-info">
-        <span class="animal-name" id="currentAnimal">Human</span>
-        <span class="total-fov" id="totalFOV">Total FOV: 200°</span>
+    <h2 class="card-title">Field of view Comparison</h2>
+    <div class="content-wrapper">
+      <div class="visualization-container">
+        <div class="animal-info" id="currentAnimal">Human</div>
+        <div class="visualization">
+          <svg viewBox="0 0 400 400" id="visionSVG">
+            <line x1="200" y1="200" x2="200" y2="50" stroke="#ddd" stroke-dasharray="4" />
+            <line x1="50" y1="200" x2="350" y2="200" stroke="#ddd" stroke-dasharray="4" />
+            <g id="visionAreas"></g>
+            <circle cx="200" cy="200" r="3" fill="black" />
+          </svg>
+        </div>
+        <div class="total-fov-container">
+          <div class="total-fov" id="totalFOV">Total FOV: 200°</div>
+        </div>
+        <div class="slider-container">
+          <input type="range" min="0" max="8" value="0" class="slider" id="animalSlider">
+        </div>
       </div>
-      <input type="range" min="0" max="8" value="0" class="slider" id="animalSlider">
-    </div>
-    <div class="visualization">
-      <svg viewBox="0 0 400 400" id="visionSVG">
-        <!-- Reference lines -->
-        <line x1="200" y1="200" x2="200" y2="50" 
-              stroke="#ddd" stroke-dasharray="4" />
-        <line x1="50" y1="200" x2="350" y2="200" 
-              stroke="#ddd" stroke-dasharray="4" />
-        
-        <!-- Vision areas will be added here by JavaScript -->
-        <g id="visionAreas"></g>
-        
-        <!-- Center point -->
-        <circle cx="200" cy="200" r="4" fill="black" />
-        
-        <!-- Legend -->
-        <g transform="translate(20, 360)">
-          <rect x="0" y="0" width="15" height="15" 
-                fill="rgba(0, 128, 255, 0.4)" />
-          <text x="25" y="12" class="legend-text" id="binocularText">
-            Binocular Vision (120°)
-          </text>
-          
-          <rect x="150" y="0" width="15" height="15" 
-                fill="rgba(255, 165, 0, 0.3)" />
-          <text x="225" y="12" class="legend-text" id="monocularText">
-            Monocular Vision (80° each side)
-          </text>
-        </g>
-      </svg>
+      <div class="info-panel">
+        <div class="vision-box">
+          <h3>Binocular Vision</h3>
+          <p>Binocular vision allows both eyes to work together, providing depth perception and a wider field of view.</p>
+          <h3>Advantages:</h3>
+          <ul>
+            <li>Better depth perception.</li>
+            <li>Reduced blind spots.</li>
+            <li>Improved motion detection.</li>
+          </ul>
+        </div>
+        <div class="vision-box">
+          <h3>Monocular Vision</h3>
+          <p>Monocular vision occurs when only one eye is used at a time, common in animals with side-positioned eyes.</p>
+          <h3>Advantages:</h3>
+          <ul>
+            <li>Wider peripheral vision.</li>
+            <li>Sharper focus on distant objects.</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -117,19 +209,15 @@
       const radius = 100;
       const centerX = 200;
       const centerY = 200;
-      
       const start = {
         x: centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180),
         y: centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)
       };
-      
       const end = {
         x: centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180),
         y: centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)
       };
-      
       const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
-      
       return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y} Z`;
     }
 
@@ -140,17 +228,17 @@
       const endAngle = animal.monocular;
       const binocularStartLeft = -animal.binocular/2;
       const binocularEndLeft = animal.binocular/2;
-
+      
       // Clear previous paths
       visionAreas.innerHTML = '';
-
+      
       // Add new paths
       const paths = [
         { d: drawArc(startAngle, binocularStartLeft), fill: 'rgba(255, 165, 0, 0.3)' },
         { d: drawArc(binocularEndLeft, endAngle), fill: 'rgba(255, 165, 0, 0.3)' },
         { d: drawArc(binocularStartLeft, binocularEndLeft), fill: 'rgba(0, 128, 255, 0.4)' }
       ];
-
+      
       paths.forEach(pathData => {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', pathData.d);
@@ -161,15 +249,14 @@
       // Update text elements
       document.getElementById('currentAnimal').textContent = animal.name;
       document.getElementById('totalFOV').textContent = `Total FOV: ${animal.total}°`;
-      document.getElementById('binocularText').textContent = 
-        `Binocular Vision (${animal.binocular}°)`;
-      document.getElementById('monocularText').textContent = 
-        `Monocular Vision (${animal.monocular}° each side)`;
     }
 
     // Initialize slider
     const slider = document.getElementById('animalSlider');
     slider.addEventListener('input', (e) => {
+      updateVisualization(parseInt(e.target.value));
+    });
+    slider.addEventListener('change', (e) => {
       updateVisualization(parseInt(e.target.value));
     });
 
