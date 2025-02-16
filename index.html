@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Field of Vision</title>
   <style>
     body {
       margin: 0;
@@ -149,20 +152,15 @@
 </head>
 <body>
   <div class="card">
-    <h2 class="card-title">Field of view Comparison</h2>
+    <h1 class="card-title">Animal Field of Vision Comparison</h1>
     <div class="content-wrapper">
       <div class="visualization-container">
-        <div class="animal-info" id="currentAnimal">Human</div>
+        <div class="animal-info">Select an animal</div>
         <div class="visualization">
-          <svg viewBox="0 0 400 400" id="visionSVG">
-            <line x1="200" y1="200" x2="200" y2="50" stroke="#ddd" stroke-dasharray="4" />
-            <line x1="50" y1="200" x2="350" y2="200" stroke="#ddd" stroke-dasharray="4" />
-            <g id="visionAreas"></g>
-            <circle cx="200" cy="200" r="3" fill="black" />
-          </svg>
+          <!-- SVG will be inserted here by JavaScript -->
         </div>
         <div class="total-fov-container">
-          <div class="total-fov" id="totalFOV">Total FOV: 200°</div>
+          <span class="total-fov">Total FOV: --°</span>
         </div>
         <div class="slider-container">
           <input type="range" min="0" max="8" value="0" class="slider" id="animalSlider">
@@ -170,28 +168,20 @@
       </div>
       <div class="info-panel">
         <div class="vision-box">
+          <h3>About Field of Vision (FOV)</h3>
+          <p>Field of vision represents the extent of the observable world that an animal can see at any given moment.</p>
+        </div>
+        <div class="vision-box">
           <h3>Binocular Vision</h3>
-          <p>Binocular vision allows both eyes to work together, providing depth perception and a wider field of view.</p>
-          <h3>Advantages:</h3>
-          <ul>
-            <li>Better depth perception.</li>
-            <li>Reduced blind spots.</li>
-            <li>Improved motion detection.</li>
-          </ul>
+          <p>The area where both eyes' views overlap, providing depth perception.</p>
         </div>
         <div class="vision-box">
           <h3>Monocular Vision</h3>
-          <p>Monocular vision occurs when only one eye is used at a time, common in animals with side-positioned eyes.</p>
-          <h3>Advantages:</h3>
-          <ul>
-            <li>Wider peripheral vision.</li>
-            <li>Sharper focus on distant objects.</li>
-          </ul>
+          <p>The areas that can be seen by only one eye, helpful for detecting movement and danger.</p>
         </div>
       </div>
     </div>
   </div>
-
   <script>
     const animals = [
       { name: "Human", binocular: 120, monocular: 80, total: 200 },
@@ -205,62 +195,38 @@
       { name: "Dog", binocular: 90, monocular: 100, total: 240 }
     ];
 
-    function drawArc(startAngle, endAngle) {
-      const radius = 100;
-      const centerX = 200;
-      const centerY = 200;
-      const start = {
-        x: centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180),
-        y: centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)
-      };
-      const end = {
-        x: centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180),
-        y: centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)
-      };
-      const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
-      return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y} Z`;
-    }
+    const slider = document.getElementById('animalSlider');
+    const animalInfo = document.querySelector('.animal-info');
+    const totalFOV = document.querySelector('.total-fov');
+    const visualization = document.querySelector('.visualization');
 
     function updateVisualization(index) {
       const animal = animals[index];
-      const visionAreas = document.getElementById('visionAreas');
-      const startAngle = -animal.monocular;
-      const endAngle = animal.monocular;
-      const binocularStartLeft = -animal.binocular/2;
-      const binocularEndLeft = animal.binocular/2;
-      
-      // Clear previous paths
-      visionAreas.innerHTML = '';
-      
-      // Add new paths
-      const paths = [
-        { d: drawArc(startAngle, binocularStartLeft), fill: 'rgba(255, 165, 0, 0.3)' },
-        { d: drawArc(binocularEndLeft, endAngle), fill: 'rgba(255, 165, 0, 0.3)' },
-        { d: drawArc(binocularStartLeft, binocularEndLeft), fill: 'rgba(0, 128, 255, 0.4)' }
-      ];
-      
-      paths.forEach(pathData => {
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', pathData.d);
-        path.setAttribute('fill', pathData.fill);
-        visionAreas.appendChild(path);
-      });
+      animalInfo.textContent = animal.name;
+      totalFOV.textContent = `Total FOV: ${animal.total}°`;
 
-      // Update text elements
-      document.getElementById('currentAnimal').textContent = animal.name;
-      document.getElementById('totalFOV').textContent = `Total FOV: ${animal.total}°`;
+      // Create SVG visualization
+      const svg = `
+        <svg viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="80" fill="#eef2ff" stroke="#6366f1" stroke-width="2"/>
+          <!-- Binocular Vision -->
+          <path d="M100,100 L${100 + 80 * Math.cos((animal.binocular / 2) * Math.PI / 180)},${100 - 80 * Math.sin((animal.binocular / 2) * Math.PI / 180)} 
+            A80,80 0 0,1 ${100 + 80 * Math.cos((-animal.binocular / 2) * Math.PI / 180)},${100 - 80 * Math.sin((-animal.binocular / 2) * Math.PI / 180)} Z"
+            fill="#6366f1" fill-opacity="0.5"/>
+          <!-- Monocular Vision -->
+          <path d="M100,100 L${100 + 80 * Math.cos((animal.monocular / 2) * Math.PI / 180)},${100 - 80 * Math.sin((animal.monocular / 2) * Math.PI / 180)} 
+            A80,80 0 0,1 ${100 + 80 * Math.cos((-animal.monocular / 2) * Math.PI / 180)},${100 - 80 * Math.sin((-animal.monocular / 2) * Math.PI / 180)} Z"
+            fill="#8b5cf6" fill-opacity="0.3"/>
+        </svg>
+      `;
+      visualization.innerHTML = svg;
     }
 
-    // Initialize slider
-    const slider = document.getElementById('animalSlider');
     slider.addEventListener('input', (e) => {
       updateVisualization(parseInt(e.target.value));
     });
-    slider.addEventListener('change', (e) => {
-      updateVisualization(parseInt(e.target.value));
-    });
 
-    // Initial render
+    // Initialize with first animal
     updateVisualization(0);
   </script>
 </body>
