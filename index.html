@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .card {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: white;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .slider-container {
+      margin-bottom: 2rem;
+    }
+
+    .animal-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .animal-name {
+      font-weight: 500;
+    }
+
+    .total-fov {
+      color: #666;
+      font-size: 0.875rem;
+    }
+
+    .slider {
+      width: 100%;
+      margin: 1rem 0;
+    }
+
+    .visualization {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .legend-text {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2 class="card-title">Animal Field of Vision Comparison</h2>
+    <div class="slider-container">
+      <div class="animal-info">
+        <span class="animal-name" id="currentAnimal">Human</span>
+        <span class="total-fov" id="totalFOV">Total FOV: 200°</span>
+      </div>
+      <input type="range" min="0" max="8" value="0" class="slider" id="animalSlider">
+    </div>
+    <div class="visualization">
+      <svg viewBox="0 0 400 400" id="visionSVG">
+        <!-- Reference lines -->
+        <line x1="200" y1="200" x2="200" y2="50" 
+              stroke="#ddd" stroke-dasharray="4" />
+        <line x1="50" y1="200" x2="350" y2="200" 
+              stroke="#ddd" stroke-dasharray="4" />
+        
+        <!-- Vision areas will be added here by JavaScript -->
+        <g id="visionAreas"></g>
+        
+        <!-- Center point -->
+        <circle cx="200" cy="200" r="4" fill="black" />
+        
+        <!-- Legend -->
+        <g transform="translate(20, 360)">
+          <rect x="0" y="0" width="15" height="15" 
+                fill="rgba(0, 128, 255, 0.4)" />
+          <text x="25" y="12" class="legend-text" id="binocularText">
+            Binocular Vision (120°)
+          </text>
+          
+          <rect x="150" y="0" width="15" height="15" 
+                fill="rgba(255, 165, 0, 0.3)" />
+          <text x="225" y="12" class="legend-text" id="monocularText">
+            Monocular Vision (80° each side)
+          </text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <script>
+    const animals = [
+      { name: "Human", binocular: 120, monocular: 80, total: 200 },
+      { name: "Eagle", binocular: 40, monocular: 140, total: 280 },
+      { name: "Horse", binocular: 65, monocular: 146, total: 350 },
+      { name: "Rabbit", binocular: 30, monocular: 170, total: 360 },
+      { name: "Chameleon", binocular: 0, monocular: 180, total: 360 },
+      { name: "Frog", binocular: 20, monocular: 160, total: 340 },
+      { name: "Shark", binocular: 10, monocular: 170, total: 360 },
+      { name: "Cat", binocular: 130, monocular: 70, total: 200 },
+      { name: "Dog", binocular: 90, monocular: 100, total: 240 }
+    ];
+
+    function drawArc(startAngle, endAngle) {
+      const radius = 100;
+      const centerX = 200;
+      const centerY = 200;
+      
+      const start = {
+        x: centerX + radius * Math.cos((startAngle - 90) * Math.PI / 180),
+        y: centerY + radius * Math.sin((startAngle - 90) * Math.PI / 180)
+      };
+      
+      const end = {
+        x: centerX + radius * Math.cos((endAngle - 90) * Math.PI / 180),
+        y: centerY + radius * Math.sin((endAngle - 90) * Math.PI / 180)
+      };
+      
+      const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+      
+      return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y} Z`;
+    }
+
+    function updateVisualization(index) {
+      const animal = animals[index];
+      const visionAreas = document.getElementById('visionAreas');
+      const startAngle = -animal.monocular;
+      const endAngle = animal.monocular;
+      const binocularStartLeft = -animal.binocular/2;
+      const binocularEndLeft = animal.binocular/2;
+
+      // Clear previous paths
+      visionAreas.innerHTML = '';
+
+      // Add new paths
+      const paths = [
+        { d: drawArc(startAngle, binocularStartLeft), fill: 'rgba(255, 165, 0, 0.3)' },
+        { d: drawArc(binocularEndLeft, endAngle), fill: 'rgba(255, 165, 0, 0.3)' },
+        { d: drawArc(binocularStartLeft, binocularEndLeft), fill: 'rgba(0, 128, 255, 0.4)' }
+      ];
+
+      paths.forEach(pathData => {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', pathData.d);
+        path.setAttribute('fill', pathData.fill);
+        visionAreas.appendChild(path);
+      });
+
+      // Update text elements
+      document.getElementById('currentAnimal').textContent = animal.name;
+      document.getElementById('totalFOV').textContent = `Total FOV: ${animal.total}°`;
+      document.getElementById('binocularText').textContent = 
+        `Binocular Vision (${animal.binocular}°)`;
+      document.getElementById('monocularText').textContent = 
+        `Monocular Vision (${animal.monocular}° each side)`;
+    }
+
+    // Initialize slider
+    const slider = document.getElementById('animalSlider');
+    slider.addEventListener('input', (e) => {
+      updateVisualization(parseInt(e.target.value));
+    });
+
+    // Initial render
+    updateVisualization(0);
+  </script>
+</body>
+</html>
